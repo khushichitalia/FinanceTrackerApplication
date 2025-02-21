@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundBeige"
+    tools:context=".ui.home.HomeFragment">
+
+    <Button
+        android:id="@+id/open_link"
+        android:layout_width="362dp"
+        android:layout_height="98dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="28dp"
+        android:backgroundTint="@color/darkBlue"
+        android:padding="8dp"
+        android:text="Sync Bank Account"
+        android:textColor="#FFFFFF"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="362dp"
+        android:layout_height="98dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="152dp"
+        android:background="@color/darkBlue"
+        android:gravity="center"
+        android:padding="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Budget:"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            android:textColor="@color/white" />
+
+        <EditText
+            android:id="@+id/bugdetInput"
+            android:layout_width="247dp"
+            android:layout_height="63dp"
+            android:hint="Enter Budget"
+            android:inputType="numberDecimal"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <!-- <EditText
+        android:id="@+id/budgetInput"
+        android:autofillHints="name"
+        android:inputType="text"
+        android:layout_width="362dp"
+        android:layout_height="98dp"
+        android:layout_marginTop="152dp"
+
+        android:hint="Enter your name..." />
+
+    <TextView
+        android:layout_width="362dp"
+        android:layout_height="98dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="152dp"
+        android:background="@color/darkBlue"
+        android:gravity="center"
+        android:padding="8dp"
+        android:text="BUDGET: "
+
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.51"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" /> -->
+
+</androidx.constraintlayout.widget.ConstraintLayout>
