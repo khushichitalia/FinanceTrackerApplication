@@ -52,4 +52,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("com.plaid.link:sdk-core:5.0.0")
+    // implementation("com.plaid.link:sdk-android:3.12.0")
 }
