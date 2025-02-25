@@ -11,7 +11,7 @@ import com.example.financetrackerapplication.models.Transaction
 
 class PlaidRepository(private val context: Context) {
     private val retrofit = Retrofit.Builder()
-        .baseUrl("http://10.0.2.2:3000/") // Replace with actual backend URL
+        .baseUrl("http://10.0.2.2:3000/") // backend URL
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
