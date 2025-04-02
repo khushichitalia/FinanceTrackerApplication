@@ -7,21 +7,21 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Plaid API Credentials
+// ✅ Plaid API Credentials
 const PLAID_CLIENT_ID = "67ad4f360245ff0021df53cc"; // Replace with your actual Plaid client ID
 const PLAID_SECRET = "575c98acd3b5fb2924cd464840a5d1"; // Replace with your actual Plaid secret
 const PLAID_ENV = "sandbox"; // Change to 'development' or 'production' if needed"
 
 const ACCESS_TOKEN_FILE = "access_token.json";
 
-// Load access token from file (if exists)
+// ✅ Load access token from file (if exists)
 let storedAccessToken = null;
 if (fs.existsSync(ACCESS_TOKEN_FILE)) {
     storedAccessToken = JSON.parse(fs.readFileSync(ACCESS_TOKEN_FILE, "utf8")).access_token;
-    console.log("Loaded Access Token:", storedAccessToken);
+    console.log("🔄 Loaded Access Token:", storedAccessToken);
 }
 
-// Route to exchange public_token for access_token
+// ✅ Route to exchange public_token for access_token
 app.post("/exchange_public_token", async (req, res) => {
     try {
         const { public_token } = req.body;
@@ -34,18 +34,18 @@ app.post("/exchange_public_token", async (req, res) => {
 
         storedAccessToken = response.data.access_token;
 
-        // Save access token to file
+        // ✅ Save access token to file
         fs.writeFileSync(ACCESS_TOKEN_FILE, JSON.stringify({ access_token: storedAccessToken }), "utf8");
 
-        console.log("Access Token Saved:", storedAccessToken);
+        console.log("✅ Access Token Saved:", storedAccessToken);
         res.json({ access_token: storedAccessToken });
     } catch (error) {
-        console.error("Error exchanging token:", error.response?.data || error.message);
+        console.error("❌ Error exchanging token:", error.response?.data || error.message);
         res.status(500).json({ error: "Failed to exchange token" });
     }
 });
 
-// Route to fetch transactions
+// ✅ Route to fetch transactions
 app.get("/api/transactions", async (req, res) => {
     try {
         if (!storedAccessToken) {
