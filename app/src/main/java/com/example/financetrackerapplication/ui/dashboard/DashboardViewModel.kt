@@ -9,6 +9,8 @@ import com.example.financetrackerapplication.database.DatabaseHelper
 import com.example.financetrackerapplication.models.Transaction
 import com.example.financetrackerapplication.repository.PlaidRepository // Import correctly
 import kotlinx.coroutines.launch
+import android.util.Log
+import kotlinx.coroutines.Dispatchers
 
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
     private val _transactions = MutableLiveData<List<Transaction>>()
@@ -17,8 +19,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     private val plaidRepository: PlaidRepository = PlaidRepository(application) // Correct instantiation
 
     fun fetchTransactionsFromAPI(accessToken: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val transactionsList = plaidRepository.getTransactions(accessToken) // Use instance variable
+
+            Log.d("DashboardVM", "Fetched ${transactionsList.size} transactions from API")
 
             if (transactionsList.isNotEmpty()) { // Check if transactionsList is not empty
                 _transactions.postValue(transactionsList)
@@ -28,6 +32,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                     dbHelper.insertTransaction(transaction)
                 }
             }
+//             val transactionsList = plaidRepository.getTransactions(accessToken)
+//             _transactions.postValue(transactionsList)
         }
     }
 

@@ -57,7 +57,7 @@ app.get("/api/transactions", async (req, res) => {
             secret: PLAID_SECRET,
             access_token: storedAccessToken,
             start_date: "1900-01-01",
-            end_date: "2024-01-31"
+            end_date: "2025-12-31"
         });
 
         console.log("Raw Transactions Response:", JSON.stringify(response.data, null, 2));

@@ -16,6 +16,7 @@ class PlaidRepository(private val context: Context) {
         .build()
 
     private val apiService = retrofit.create(PlaidApi::class.java)
+    private val plaidService: PlaidBackendService = retrofit.create(PlaidBackendService::class.java)
 
     fun exchangePublicToken(publicToken: String, callback: (String?) -> Unit) {
         val call = apiService.exchangePublicToken(ExchangeTokenRequest(publicToken))
@@ -37,18 +38,38 @@ class PlaidRepository(private val context: Context) {
         })
     }
 
+//    suspend fun getTransactions(accessToken: String): List<Transaction> {
+//        return try {
+//            val response = apiService.transactionsGet(
+//                TransactionsGetRequest(
+//                    access_token = accessToken,
+//                    start_date = "2000-01-01",
+//                    end_date = "2025-12-31"
+//                )
+//            )
+//            response.transactions
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            emptyList()
+//        }
+//    }
+
     suspend fun getTransactions(accessToken: String): List<Transaction> {
         return try {
-            val response = apiService.transactionsGet(
-                TransactionsGetRequest(
-                    access_token = accessToken,
-                    start_date = "2024-01-01",
-                    end_date = "2024-01-31"
-                )
-            )
-            response.transactions
+            val response = plaidService.getTransactions().execute()
+            Log.d("PlaidRepository", "Response success: ${response.isSuccessful}")
+
+            if (response.isSuccessful) {
+                val transactions = response.body()?.transactions ?: emptyList()
+                Log.d("PlaidRepository", "Parsed ${transactions.size} transactions")
+                transactions
+            } else {
+                val errorJson = response.errorBody()?.string()
+                Log.e("PlaidRepository", "Error body: $errorJson")
+                emptyList()
+            }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("PlaidRepository", "Exception: ", e)
             emptyList()
         }
     }

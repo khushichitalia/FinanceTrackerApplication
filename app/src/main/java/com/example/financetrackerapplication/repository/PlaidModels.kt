@@ -26,3 +26,4 @@ data class Transaction(
     val date: String,
     val name: String
 )
+

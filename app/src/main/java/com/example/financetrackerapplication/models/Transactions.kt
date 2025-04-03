@@ -1,8 +1,12 @@
 package com.example.financetrackerapplication.models
 
 data class Transaction(
-    val transactionId: String,
+    val transaction_id: String,
     val amount: Double,
     val date: String,
     val name: String
+)
+
+data class TransactionResponse(
+    val transactions: List<Transaction>
 )

@@ -58,7 +58,7 @@ class HomeFragment : Fragment() {
         val linkButton: Button = binding.openLink
         linkButton.setOnClickListener {
             val linkTokenConfiguration = linkTokenConfiguration {
-                token = "link-sandbox-ea24422d-75b8-4ae0-9604-ff7a4b446619"
+                token = "link-sandbox-2426abfa-9080-494a-b453-565edcf64bcf"
             }
             linkAccountToPlaid.launch(linkTokenConfiguration)
         }
