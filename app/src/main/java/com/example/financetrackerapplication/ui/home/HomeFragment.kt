@@ -16,6 +16,7 @@ import com.plaid.link.OpenPlaidLink
 import com.plaid.link.linkTokenConfiguration
 import com.plaid.link.result.LinkExit
 import com.plaid.link.result.LinkSuccess
+import java.util.Calendar
 
 class HomeFragment : Fragment() {
 
@@ -61,6 +62,19 @@ class HomeFragment : Fragment() {
                 token = "link-sandbox-2426abfa-9080-494a-b453-565edcf64bcf"
             }
             linkAccountToPlaid.launch(linkTokenConfiguration)
+        }
+
+        binding.monthYearInput.setOnClickListener {
+            val monthYearPicker = MonthYearPickerDialog()
+            monthYearPicker.setListener { _, year, month, _ ->
+                val calendar = Calendar.getInstance()
+                calendar.set(Calendar.YEAR, year)
+                calendar.set(Calendar.MONTH, month)
+
+                val formattedDate = android.text.format.DateFormat.format("MMMM yyyy", calendar.time)
+                binding.monthYearInput.setText(formattedDate.toString())
+            }
+            monthYearPicker.show(parentFragmentManager, "MonthYearPickerDialog")
         }
 
         return root
