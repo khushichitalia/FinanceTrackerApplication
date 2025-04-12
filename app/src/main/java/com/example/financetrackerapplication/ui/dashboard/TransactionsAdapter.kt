@@ -13,9 +13,18 @@ class TransactionsAdapter(private var transactions: List<Transaction>) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(transaction: Transaction) {
             binding.transactionName.text = transaction.name
-            binding.transactionAmount.text = "$${transaction.amount}"
+            binding.transactionAmount.text = "$${"%.2f".format(transaction.amount)}"
             binding.transactionDate.text = transaction.date
+
+            // Color amount based on value
+            val amountColor = if (transaction.amount >= 0) {
+                itemView.context.getColor(android.R.color.holo_green_dark)
+            } else {
+                itemView.context.getColor(android.R.color.holo_red_dark)
+            }
+            binding.transactionAmount.setTextColor(amountColor)
         }
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {

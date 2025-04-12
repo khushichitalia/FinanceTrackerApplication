@@ -17,7 +17,6 @@ class DashboardFragment : Fragment() {
     private var _binding: FragmentDashboardBinding? = null
     private val binding get() = _binding!!
     private lateinit var dashboardViewModel: DashboardViewModel
-    private lateinit var transactionsAdapter: TransactionsAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,25 +27,34 @@ class DashboardFragment : Fragment() {
         _binding = FragmentDashboardBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        // Initialize RecyclerView
-        transactionsAdapter = TransactionsAdapter(emptyList())
-        binding.transactionsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.transactionsRecyclerView.adapter = transactionsAdapter
+        val incomeAdapter = TransactionsAdapter(emptyList())
+        val expenseAdapter = TransactionsAdapter(emptyList())
 
-        // Observe transactions from ViewModel
+        binding.incomeRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.expenseRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        binding.incomeRecyclerView.adapter = incomeAdapter
+        binding.expenseRecyclerView.adapter = expenseAdapter
+
         dashboardViewModel.transactions.observe(viewLifecycleOwner) { transactions ->
-            transactionsAdapter.updateTransactions(transactions)
+            val income = transactions.filter { it.amount >= 0 }
+            val expenses = transactions.filter { it.amount < 0 }
+
+            val totalIncome = income.sumOf { it.amount }
+            val totalExpenses = expenses.sumOf { -it.amount }
+
+            binding.incomeHeader.text = "Income: $%.2f".format(totalIncome)
+            binding.expenseHeader.text = "Expenses: $%.2f".format(totalExpenses)
+
+            incomeAdapter.updateTransactions(income)
+            expenseAdapter.updateTransactions(expenses)
         }
 
-        // Get stored access token
         val accessToken = SharedPrefUtils.getAccessToken(requireContext())
-
         if (accessToken != null) {
-            // If access token exists, fetch transactions
             dashboardViewModel.fetchTransactionsFromDB()
             dashboardViewModel.fetchTransactionsFromAPI(accessToken)
         } else {
-            // Show message that account needs linking if no access token
             Toast.makeText(requireContext(), "Please link your account on the Home Page", Toast.LENGTH_LONG).show()
         }
 

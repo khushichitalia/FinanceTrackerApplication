@@ -22,6 +22,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch(Dispatchers.IO) {
             val transactionsList = plaidRepository.getTransactions(accessToken) // Use instance variable
 
+            transactionsList.forEach {
+                Log.d("DEBUG_TRANSACTIONS", "${it.name}: ${it.amount}")
+            }
+
             Log.d("DashboardVM", "Fetched ${transactionsList.size} transactions from API")
 
             if (transactionsList.isNotEmpty()) { // Check if transactionsList is not empty
