@@ -58,7 +58,7 @@ class HomeFragment : Fragment() {
 
         plaidRepository = PlaidRepository(requireContext())
 
-        SharedPrefUtils.clearAccessToken(requireContext())
+        // SharedPrefUtils.clearAccessToken(requireContext())
 
         val linkButton: Button = binding.openLink
         linkButton.setOnClickListener {
