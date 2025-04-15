@@ -8,6 +8,9 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import com.example.financetrackerapplication.models.Transaction
+import com.example.financetrackerapplication.models.AccountRequest
+import com.example.financetrackerapplication.models.AccountResponse
+import com.example.financetrackerapplication.models.LinkedAccount
 
 class PlaidRepository(private val context: Context) {
     private val retrofit = Retrofit.Builder()
@@ -38,22 +41,6 @@ class PlaidRepository(private val context: Context) {
         })
     }
 
-//    suspend fun getTransactions(accessToken: String): List<Transaction> {
-//        return try {
-//            val response = apiService.transactionsGet(
-//                TransactionsGetRequest(
-//                    access_token = accessToken,
-//                    start_date = "2000-01-01",
-//                    end_date = "2025-12-31"
-//                )
-//            )
-//            response.transactions
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//            emptyList()
-//        }
-//    }
-
     suspend fun getTransactions(accessToken: String): List<Transaction> {
         return try {
             val response = plaidService.getTransactions().execute()
@@ -72,5 +59,26 @@ class PlaidRepository(private val context: Context) {
             Log.e("PlaidRepository", "Exception: ", e)
             emptyList()
         }
+    }
+
+    // ✅ NEW FUNCTION: Get accounts linked to access token
+    fun getAccounts(accessToken: String, callback: (List<LinkedAccount>) -> Unit) {
+        val call = apiService.getAccounts(AccountRequest(accessToken))
+        call.enqueue(object : Callback<AccountResponse> {
+            override fun onResponse(call: Call<AccountResponse>, response: Response<AccountResponse>) {
+                if (response.isSuccessful) {
+                    val accounts = response.body()?.accounts ?: emptyList()
+                    callback(accounts)
+                } else {
+                    Log.e("PlaidRepository", "Failed to fetch accounts")
+                    callback(emptyList())
+                }
+            }
+
+            override fun onFailure(call: Call<AccountResponse>, t: Throwable) {
+                Log.e("PlaidRepository", "Network error: ${t.message}")
+                callback(emptyList())
+            }
+        })
     }
 }

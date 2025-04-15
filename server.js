@@ -10,7 +10,7 @@ app.use(cors());
 // ✅ Plaid API Credentials
 const PLAID_CLIENT_ID = "67ad4f360245ff0021df53cc"; // Replace with your actual Plaid client ID
 const PLAID_SECRET = "575c98acd3b5fb2924cd464840a5d1"; // Replace with your actual Plaid secret
-const PLAID_ENV = "sandbox"; // Change to 'development' or 'production' if needed"
+const PLAID_ENV = "sandbox"; // 'development' or 'production' if needed
 
 const ACCESS_TOKEN_FILE = "access_token.json";
 
@@ -61,7 +61,6 @@ app.get("/api/transactions", async (req, res) => {
         });
 
         console.log("Raw Transactions Response:", JSON.stringify(response.data, null, 2));
-        console.log("Transactions Retrieved");
         res.json(response.data);
     } catch (error) {
         console.error("Error fetching transactions:", error.response?.data || error.message);
@@ -69,6 +68,7 @@ app.get("/api/transactions", async (req, res) => {
     }
 });
 
+// ✅ Route to refresh transactions
 app.post("/transactions/refresh", async (req, res) => {
     try {
         if (!storedAccessToken) {
@@ -81,11 +81,38 @@ app.post("/transactions/refresh", async (req, res) => {
             access_token: storedAccessToken
         });
 
-        console.log("Transactions Refreshed");
         res.json({ message: "Transactions refreshed successfully!", request_id: response.data.request_id });
     } catch (error) {
         console.error("Error refreshing transactions:", error.response?.data || error.message);
         res.status(500).json({ error: "Failed to refresh transactions" });
+    }
+});
+
+// ✅ NEW: Route to fetch linked accounts (used by Android app)
+app.post("/accounts", async (req, res) => {
+    try {
+        const accessToken = req.body.access_token || storedAccessToken;
+
+        if (!accessToken) {
+            return res.status(400).json({ error: "No access token provided." });
+        }
+
+        const response = await axios.post(`https://${PLAID_ENV}.plaid.com/accounts/get`, {
+            client_id: PLAID_CLIENT_ID,
+            secret: PLAID_SECRET,
+            access_token: accessToken
+        });
+
+        const accounts = response.data.accounts.map((acc) => ({
+            account_id: acc.account_id,
+            name: acc.name,
+            institution_name: "Plaid Sandbox" // Optional: look up from item_id if needed
+        }));
+
+        res.json({ accounts });
+    } catch (error) {
+        console.error("❌ Error fetching accounts:", error.response?.data || error.message);
+        res.status(500).json({ error: "Failed to fetch accounts" });
     }
 });
 

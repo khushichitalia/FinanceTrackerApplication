@@ -17,6 +17,8 @@ import com.plaid.link.linkTokenConfiguration
 import com.plaid.link.result.LinkExit
 import com.plaid.link.result.LinkSuccess
 import java.util.Calendar
+import com.example.financetrackerapplication.database.DatabaseHelper
+import com.example.financetrackerapplication.models.LinkedAccount
 
 class HomeFragment : Fragment() {
 
@@ -56,10 +58,12 @@ class HomeFragment : Fragment() {
 
         plaidRepository = PlaidRepository(requireContext())
 
+        SharedPrefUtils.clearAccessToken(requireContext())
+
         val linkButton: Button = binding.openLink
         linkButton.setOnClickListener {
             val linkTokenConfiguration = linkTokenConfiguration {
-                token = "link-sandbox-95d80bee-671a-44cc-954c-3ccf3c39f1e0"
+                token =  "link-sandbox-546f12e0-b2f2-4dd4-9ddb-67e67bc6f551"
             }
             linkAccountToPlaid.launch(linkTokenConfiguration)
         }
@@ -83,14 +87,36 @@ class HomeFragment : Fragment() {
     private fun exchangePublicTokenForAccessToken(publicToken: String) {
         plaidRepository.exchangePublicToken(publicToken) { accessToken ->
             if (accessToken != null) {
-                // Save `access_token` securely
                 SharedPrefUtils.saveAccessToken(requireContext(), accessToken)
-                Toast.makeText(requireContext(), "Bank Account Linked!", Toast.LENGTH_SHORT).show()
+
+                plaidRepository.getAccounts(accessToken) { accounts ->
+                    val dbHelper = DatabaseHelper(requireContext())
+                    var newLinkCount = 0
+
+                    accounts.forEach { account ->
+                        val accountId = account.account_id
+                        val accountName = account.name
+                        val institution = account.institution_name ?: "Unknown"
+
+                        Log.d("AccountCheck", "Account ID: $accountId, Institution: $institution, Name: $accountName")
+
+                        if (dbHelper.insertLinkedAccount(accountId, accountName, institution)) {
+                            newLinkCount++
+                        }
+                    }
+
+                    if (newLinkCount > 0) {
+                        Toast.makeText(requireContext(), "$newLinkCount new account(s) linked!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "No new accounts linked (already added)", Toast.LENGTH_SHORT).show()
+                    }
+                }
             } else {
                 Toast.makeText(requireContext(), "Failed to exchange token", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
