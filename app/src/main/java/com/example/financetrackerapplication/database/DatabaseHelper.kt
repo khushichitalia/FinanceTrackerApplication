@@ -11,7 +11,7 @@ class DatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "transactions.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 3
 
         const val TABLE_TRANSACTIONS = "transactions"
         const val COLUMN_ID = "id"
@@ -23,6 +23,8 @@ class DatabaseHelper(context: Context) :
         const val COLUMN_ACCOUNT_ID = "account_id"
         const val COLUMN_ACCOUNT_NAME = "account_name"
         const val COLUMN_INSTITUTION_NAME = "institution_name"
+
+        const val TABLE_BUDGETS = "budgets"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -43,13 +45,24 @@ class DatabaseHelper(context: Context) :
             )
         """.trimIndent()
 
+        val createBudgetsTable = """
+            CREATE TABLE IF NOT EXISTS $TABLE_BUDGETS (
+                month INTEGER,
+                year INTEGER,
+                amount REAL,
+                PRIMARY KEY (month, year)
+            )
+        """.trimIndent()
+
         db.execSQL(createTransactionsTable)
         db.execSQL(createAccountsTable)
+        db.execSQL(createBudgetsTable)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         db.execSQL("DROP TABLE IF EXISTS $TABLE_TRANSACTIONS")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_ACCOUNTS")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_BUDGETS")
         onCreate(db)
     }
 
@@ -63,10 +76,17 @@ class DatabaseHelper(context: Context) :
         return db.insert(TABLE_TRANSACTIONS, null, values)
     }
 
-    fun getAllTransactions(): List<Transaction> {
+    fun getTransactionsByMonthYear(month: Int, year: Int): List<Transaction> {
         val transactions = mutableListOf<Transaction>()
         val db = readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM $TABLE_TRANSACTIONS", null)
+
+        val query = """
+        SELECT * FROM $TABLE_TRANSACTIONS
+        WHERE strftime('%m', $COLUMN_DATE) = ?
+        AND strftime('%Y', $COLUMN_DATE) = ?
+        """.trimIndent()
+
+        val cursor = db.rawQuery(query, arrayOf(String.format("%02d", month), year.toString()))
 
         while (cursor.moveToNext()) {
             val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID))
@@ -80,11 +100,29 @@ class DatabaseHelper(context: Context) :
         return transactions
     }
 
-    fun insertLinkedAccount(accountId: String, accountName: String, institutionName: String): Boolean {
-        if (isAccountLinked(accountId)) {
-            android.util.Log.d("LinkedAccountCheck", "Account already linked: $accountId")
-            return false
+    fun insertOrUpdateBudget(month: Int, year: Int, amount: Double): Boolean {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put("month", month)
+            put("year", year)
+            put("amount", amount)
         }
+        return db.insertWithOnConflict(TABLE_BUDGETS, null, values, SQLiteDatabase.CONFLICT_REPLACE) != -1L
+    }
+
+    fun getBudget(month: Int, year: Int): Double {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT amount FROM $TABLE_BUDGETS WHERE month = ? AND year = ?",
+            arrayOf(month.toString(), year.toString())
+        )
+        val amount = if (cursor.moveToFirst()) cursor.getDouble(0) else 0.0
+        cursor.close()
+        return amount
+    }
+
+    fun insertLinkedAccount(accountId: String, accountName: String, institutionName: String): Boolean {
+        if (isAccountLinked(accountId)) return false
 
         val db = writableDatabase
         val values = ContentValues().apply {
@@ -118,21 +156,10 @@ class DatabaseHelper(context: Context) :
         return list
     }
 
-    fun clearAllLinkedAccounts() {
-        writableDatabase.execSQL("DELETE FROM $TABLE_ACCOUNTS")
-    }
-
-    fun getTransactionsByMonthYear(month: Int, year: Int): List<Transaction> {
+    fun getAllTransactions(): List<Transaction> {
         val transactions = mutableListOf<Transaction>()
         val db = readableDatabase
-
-        val query = """
-        SELECT * FROM $TABLE_TRANSACTIONS
-        WHERE strftime('%m', $COLUMN_DATE) = ?
-        AND strftime('%Y', $COLUMN_DATE) = ?
-    """.trimIndent()
-
-        val cursor = db.rawQuery(query, arrayOf(String.format("%02d", month), year.toString()))
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_TRANSACTIONS", null)
 
         while (cursor.moveToNext()) {
             val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID))
@@ -142,7 +169,12 @@ class DatabaseHelper(context: Context) :
 
             transactions.add(Transaction(id.toString(), amount, date, name))
         }
+
         cursor.close()
         return transactions
+    }
+
+    fun clearAllLinkedAccounts() {
+        writableDatabase.execSQL("DELETE FROM $TABLE_ACCOUNTS")
     }
 }

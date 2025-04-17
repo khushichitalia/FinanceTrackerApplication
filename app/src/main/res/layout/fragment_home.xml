@@ -7,6 +7,7 @@
     android:background="@color/backgroundBeige"
     tools:context=".ui.home.HomeFragment">
 
+    <!-- Sync Bank Button -->
     <Button
         android:id="@+id/open_link"
         android:layout_width="362dp"
@@ -23,10 +24,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Budget Section -->
     <LinearLayout
         android:layout_width="362dp"
         android:layout_height="98dp"
-        android:layout_gravity="center"
         android:layout_marginTop="152dp"
         android:background="@color/darkBlue"
         android:gravity="center"
@@ -34,7 +35,8 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
+        app:layout_constraintTop_toTopOf="parent">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -44,14 +46,17 @@
             android:textColor="@color/white" />
 
         <EditText
-            android:id="@+id/bugdetInput"
+            android:id="@+id/budgetInput"
             android:layout_width="247dp"
             android:layout_height="63dp"
             android:hint="Enter Budget"
             android:inputType="numberDecimal"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:backgroundTint="@color/white" />
     </LinearLayout>
 
+    <!-- Month Year Picker -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/monthYearLayout"
         android:layout_width="362dp"
@@ -70,32 +75,5 @@
             android:clickable="true"
             android:inputType="none" />
     </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- <EditText
-        android:id="@+id/budgetInput"
-        android:autofillHints="name"
-        android:inputType="text"
-        android:layout_width="362dp"
-        android:layout_height="98dp"
-        android:layout_marginTop="152dp"
-
-        android:hint="Enter your name..." />
-
-    <TextView
-        android:layout_width="362dp"
-        android:layout_height="98dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="152dp"
-        android:background="@color/darkBlue"
-        android:gravity="center"
-        android:padding="8dp"
-        android:text="BUDGET: "
-
-        android:textSize="25sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.51"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" /> -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,9 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.example.financetrackerapplication.databinding.FragmentHomeBinding
+import com.example.financetrackerapplication.models.LinkedAccount
 import com.example.financetrackerapplication.repository.PlaidRepository
 import com.example.financetrackerapplication.utils.SharedPrefUtils
 import com.plaid.link.OpenPlaidLink
@@ -17,15 +20,14 @@ import com.plaid.link.linkTokenConfiguration
 import com.plaid.link.result.LinkExit
 import com.plaid.link.result.LinkSuccess
 import java.util.Calendar
-import com.example.financetrackerapplication.database.DatabaseHelper
-import com.example.financetrackerapplication.models.LinkedAccount
 
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private lateinit var plaidRepository: PlaidRepository
     private lateinit var homeViewModel: HomeViewModel
+    private lateinit var plaidRepository: PlaidRepository
+    private val dateFilterViewModel: DateFilterViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,29 +62,42 @@ class HomeFragment : Fragment() {
         val linkButton: Button = binding.openLink
         linkButton.setOnClickListener {
             val linkTokenConfiguration = linkTokenConfiguration {
-                token =  "link-sandbox-546f12e0-b2f2-4dd4-9ddb-67e67bc6f551"
+                token = "link-sandbox-546f12e0-b2f2-4dd4-9ddb-67e67bc6f551"
             }
             linkAccountToPlaid.launch(linkTokenConfiguration)
         }
 
         binding.monthYearInput.setOnClickListener {
-            val monthYearPicker = MonthYearPickerDialog()
-            monthYearPicker.setListener { _, year, month, _ ->
-                val calendar = Calendar.getInstance()
-                calendar.set(Calendar.YEAR, year)
-                calendar.set(Calendar.MONTH, month)
-
-                val formattedDate = android.text.format.DateFormat.format("MMMM yyyy", calendar.time)
-                binding.monthYearInput.setText(formattedDate.toString())
-
-                homeViewModel.loadTransactions(month + 1, year) // +1 because SQLite expects 1-based month
+            val picker = MonthYearPickerDialog()
+            picker.setListener { _, year, month, _ ->
+                val calendar = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, year)
+                    set(Calendar.MONTH, month)
+                }
+                val formatted = android.text.format.DateFormat.format("MMMM yyyy", calendar.time)
+                binding.monthYearInput.setText(formatted)
+                dateFilterViewModel.setMonthYear(month, year)
             }
-            monthYearPicker.show(parentFragmentManager, "MonthYearPickerDialog")
+            picker.show(parentFragmentManager, "MonthYearPickerDialog")
         }
 
-        homeViewModel.transactions.observe(viewLifecycleOwner) { txns ->
-            Log.d("FilteredTxns", "Got ${txns.size} transactions for selected month/year.")
-            // TODO: Update your RecyclerView or UI here
+        dateFilterViewModel.monthYear.observe(viewLifecycleOwner) { (month, year) ->
+            homeViewModel.loadTransactions(month + 1, year)
+            homeViewModel.loadBudget(month + 1, year)
+        }
+
+        homeViewModel.budget.observe(viewLifecycleOwner) { amount ->
+            binding.budgetInput.setText(if (amount == 0.0) "" else "%.2f".format(amount))
+        }
+
+        binding.budgetInput.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                val text = binding.budgetInput.text.toString()
+                val amount = text.toDoubleOrNull() ?: 0.0
+                dateFilterViewModel.monthYear.value?.let { (month, year) ->
+                    homeViewModel.saveBudget(month + 1, year, amount)
+                }
+            }
         }
 
         return root
@@ -94,26 +109,21 @@ class HomeFragment : Fragment() {
                 SharedPrefUtils.saveAccessToken(requireContext(), accessToken)
 
                 plaidRepository.getAccounts(accessToken) { accounts ->
-                    val dbHelper = DatabaseHelper(requireContext())
+                    val dbHelper = com.example.financetrackerapplication.database.DatabaseHelper(requireContext())
                     var newLinkCount = 0
 
                     accounts.forEach { account ->
-                        val accountId = account.account_id
-                        val accountName = account.name
-                        val institution = account.institution_name ?: "Unknown"
-
-                        Log.d("AccountCheck", "Account ID: $accountId, Institution: $institution, Name: $accountName")
-
-                        if (dbHelper.insertLinkedAccount(accountId, accountName, institution)) {
+                        if (dbHelper.insertLinkedAccount(account.account_id, account.name, account.institution_name ?: "Unknown")) {
                             newLinkCount++
                         }
                     }
 
-                    if (newLinkCount > 0) {
-                        Toast.makeText(requireContext(), "$newLinkCount new account(s) linked!", Toast.LENGTH_SHORT).show()
+                    val message = if (newLinkCount > 0) {
+                        "$newLinkCount new account(s) linked!"
                     } else {
-                        Toast.makeText(requireContext(), "No new accounts linked (already added)", Toast.LENGTH_SHORT).show()
+                        "No new accounts linked (already added)"
                     }
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
                 }
             } else {
                 Toast.makeText(requireContext(), "Failed to exchange token", Toast.LENGTH_SHORT).show()

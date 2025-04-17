@@ -6,9 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.financetrackerapplication.databinding.FragmentDashboardBinding
+import com.example.financetrackerapplication.ui.home.DateFilterViewModel
 import com.example.financetrackerapplication.ui.home.MonthYearPickerDialog
 import com.example.financetrackerapplication.utils.SharedPrefUtils
 import java.util.Calendar
@@ -18,6 +20,7 @@ class DashboardFragment : Fragment() {
     private var _binding: FragmentDashboardBinding? = null
     private val binding get() = _binding!!
     private lateinit var dashboardViewModel: DashboardViewModel
+    private val dateFilterViewModel: DateFilterViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,18 +40,33 @@ class DashboardFragment : Fragment() {
         binding.incomeRecyclerView.adapter = incomeAdapter
         binding.expenseRecyclerView.adapter = expenseAdapter
 
+        // Month-Year Picker Click
         binding.monthYearInput.setOnClickListener {
             val monthYearPicker = MonthYearPickerDialog()
             monthYearPicker.setListener { _, year, month, _ ->
-                val calendar = Calendar.getInstance()
-                calendar.set(Calendar.YEAR, year)
-                calendar.set(Calendar.MONTH, month)
+                val calendar = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, year)
+                    set(Calendar.MONTH, month)
+                }
                 val formattedDate = android.text.format.DateFormat.format("MMMM yyyy", calendar.time)
                 binding.monthYearInput.setText(formattedDate.toString())
 
-                dashboardViewModel.fetchTransactionsByMonthYear(month + 1, year) // +1 because month is 0-based
+                // Share selection across fragments
+                dateFilterViewModel.setMonthYear(month, year)
             }
             monthYearPicker.show(parentFragmentManager, "MonthYearPickerDialog")
+        }
+
+        // Observe Shared DateFilterViewModel
+        dateFilterViewModel.monthYear.observe(viewLifecycleOwner) { (month, year) ->
+            val calendar = Calendar.getInstance().apply {
+                set(Calendar.YEAR, year)
+                set(Calendar.MONTH, month)
+            }
+            val formattedDate = android.text.format.DateFormat.format("MMMM yyyy", calendar.time)
+            binding.monthYearInput.setText(formattedDate.toString())
+
+            dashboardViewModel.fetchTransactionsByMonthYear(month + 1, year)
         }
 
         dashboardViewModel.transactions.observe(viewLifecycleOwner) { transactions ->
@@ -72,7 +90,7 @@ class DashboardFragment : Fragment() {
 
         val accessToken = SharedPrefUtils.getAccessToken(requireContext())
         if (accessToken != null) {
-            dashboardViewModel.fetchTransactionsFromDB()
+            // Don't fetch unfiltered list — let observer trigger the filtered one
             dashboardViewModel.fetchTransactionsFromAPI(accessToken)
         } else {
             Toast.makeText(requireContext(), "Please link your account on the Home Page", Toast.LENGTH_LONG).show()

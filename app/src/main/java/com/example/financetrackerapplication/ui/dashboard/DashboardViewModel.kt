@@ -29,13 +29,12 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
             Log.d("DashboardVM", "Fetched ${transactionsList.size} transactions from API")
 
-            if (transactionsList.isNotEmpty()) {
-                _transactions.postValue(transactionsList)
-
-                transactionsList.forEach { transaction ->
-                    dbHelper.insertTransaction(transaction)
-                }
+            // ❗️ONLY insert into database, do NOT set _transactions directly
+            transactionsList.forEach { transaction ->
+                dbHelper.insertTransaction(transaction)
             }
+
+            // ✅ Let observer re-trigger filtered fetch afterward
         }
     }
 
@@ -47,6 +46,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun fetchTransactionsByMonthYear(month: Int, year: Int) {
         viewModelScope.launch {
+            Log.d("TXN_FILTER", "Filtering for $month/$year")
             _transactions.postValue(dbHelper.getTransactionsByMonthYear(month, year))
         }
     }
