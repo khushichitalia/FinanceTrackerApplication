@@ -174,6 +174,10 @@ class DatabaseHelper(context: Context) :
         return transactions
     }
 
+    fun clearTransactions() {
+        writableDatabase.execSQL("DELETE FROM $TABLE_TRANSACTIONS")
+    }
+
     fun clearAllLinkedAccounts() {
         writableDatabase.execSQL("DELETE FROM $TABLE_ACCOUNTS")
     }

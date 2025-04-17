@@ -29,12 +29,14 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
             Log.d("DashboardVM", "Fetched ${transactionsList.size} transactions from API")
 
-            // ❗️ONLY insert into database, do NOT set _transactions directly
+            // ✅ Clear old transactions before inserting new ones
+            dbHelper.clearTransactions()
+
             transactionsList.forEach { transaction ->
                 dbHelper.insertTransaction(transaction)
             }
 
-            // ✅ Let observer re-trigger filtered fetch afterward
+            // ✅ Let the observer re-trigger fetchTransactionsByMonthYear(...)
         }
     }
 
