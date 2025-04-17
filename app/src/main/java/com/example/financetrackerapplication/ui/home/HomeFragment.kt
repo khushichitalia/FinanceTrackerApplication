@@ -1,5 +1,6 @@
 package com.example.financetrackerapplication.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
-import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -15,6 +15,8 @@ import com.example.financetrackerapplication.databinding.FragmentHomeBinding
 import com.example.financetrackerapplication.models.LinkedAccount
 import com.example.financetrackerapplication.repository.PlaidRepository
 import com.example.financetrackerapplication.utils.SharedPrefUtils
+import com.example.financetrackerapplication.ui.authentication.SignInActivity
+import com.google.firebase.auth.FirebaseAuth
 import com.plaid.link.OpenPlaidLink
 import com.plaid.link.linkTokenConfiguration
 import com.plaid.link.result.LinkExit
@@ -59,8 +61,7 @@ class HomeFragment : Fragment() {
         homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
         plaidRepository = PlaidRepository(requireContext())
 
-        val linkButton: Button = binding.openLink
-        linkButton.setOnClickListener {
+        binding.openLink.setOnClickListener {
             val linkTokenConfiguration = linkTokenConfiguration {
                 token = "link-sandbox-546f12e0-b2f2-4dd4-9ddb-67e67bc6f551"
             }
@@ -81,6 +82,7 @@ class HomeFragment : Fragment() {
             picker.show(parentFragmentManager, "MonthYearPickerDialog")
         }
 
+        // Load data when month/year changes
         dateFilterViewModel.monthYear.observe(viewLifecycleOwner) { (month, year) ->
             homeViewModel.loadTransactions(month + 1, year)
             homeViewModel.loadBudget(month + 1, year)
@@ -98,6 +100,16 @@ class HomeFragment : Fragment() {
                     homeViewModel.saveBudget(month + 1, year, amount)
                 }
             }
+        }
+
+        // Log Out Button Click
+        binding.logoutButton.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+            Toast.makeText(requireContext(), "Logged out", Toast.LENGTH_SHORT).show()
+
+            val intent = Intent(requireContext(), SignInActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
         }
 
         return root

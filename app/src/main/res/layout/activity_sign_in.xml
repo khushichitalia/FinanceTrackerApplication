@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/darkBlue"
     tools:context="com.example.financetrackerapplication.ui.authentication.SignInActivity">
 
 
@@ -25,7 +26,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Type your Email"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:background="@color/backgroundLightBlue" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -47,7 +49,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Type Your Password"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:background="@color/backgroundLightBlue" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.appcompat.widget.AppCompatButton
@@ -55,37 +58,50 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
-        android:background="@color/backgroundBeige"
+        android:background="@color/backgroundLightBlue"
         android:text="Sign In"
         android:textColor="@color/black"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/passwordLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/passwordLayout"
+        app:layout_constraintVertical_bias="0.065" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/black"
-        android:text="Not Registered Yet , Sign Up !"
+        android:text="Not Registered Yet? Sign Up!"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button" />
+        app:layout_constraintTop_toBottomOf="@+id/button"
+        app:layout_constraintVertical_bias="0.054" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="243dp"
+        android:layout_height="33dp"
+        android:layout_marginTop="300dp"
+        android:text="Login to your Account"
+        android:textColor="@color/backgroundLightBlue"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.095"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/textView2"
-        android:layout_width="314dp"
-        android:layout_height="87dp"
-        android:layout_marginTop="56dp"
-        android:text="Finance Tracker Application"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.494"
+        android:layout_width="171dp"
+        android:layout_height="62dp"
+        android:layout_marginStart="120dp"
+        android:layout_marginTop="160dp"
+        android:text="FinTrack"
+        android:textColor="@color/white"
+        android:textSize="45dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

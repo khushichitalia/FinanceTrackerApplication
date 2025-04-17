@@ -7,15 +7,32 @@
     android:background="@color/backgroundLightBlue"
     tools:context=".ui.home.HomeFragment">
 
-    <!-- Month/Year Picker -->
+    <!-- Log Out Button -->
+
+    <!-- Month Year Picker -->
+
+    <Button
+        android:id="@+id/logoutButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:backgroundTint="@color/darkBlue"
+        android:text="Log Out"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/monthYearLayout"
         android:layout_width="362dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        android:hint="Select Month and Year"
-        android:background="@color/white"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="16dp"
+        android:hint="Choose Month and Year"
+        app:layout_constraintTop_toBottomOf="@id/logoutButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -25,18 +42,16 @@
             android:layout_height="wrap_content"
             android:focusable="false"
             android:clickable="true"
-            android:inputType="none"
-            android:drawableRight="@android:drawable/ic_menu_my_calendar"
-            android:padding="12dp" />
+            android:inputType="none" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Sync Bank Account Button -->
+    <!-- Sync Bank Button -->
     <Button
         android:id="@+id/open_link"
         android:layout_width="362dp"
         android:layout_height="98dp"
         android:layout_gravity="center"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:backgroundTint="@color/darkBlue"
         android:padding="8dp"
         android:text="Sync Bank Account"
@@ -47,12 +62,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Budget Input -->
+    <!-- Budget Section -->
     <LinearLayout
         android:layout_width="362dp"
         android:layout_height="98dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:background="@color/darkBlue"
         android:gravity="center"
         android:padding="8dp"
@@ -75,7 +89,9 @@
             android:layout_height="63dp"
             android:hint="Enter Budget"
             android:inputType="numberDecimal"
-            android:textColor="@color/white" />
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:backgroundTint="@color/white" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
