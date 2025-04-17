@@ -25,6 +25,7 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private lateinit var plaidRepository: PlaidRepository
+    private lateinit var homeViewModel: HomeViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,8 +38,6 @@ class HomeFragment : Fragment() {
                 is LinkSuccess -> {
                     val publicToken = it.publicToken
                     Log.i("Plaid", "Public Token: $publicToken")
-
-                    // Exchange the `public_token` for `access_token`
                     exchangePublicTokenForAccessToken(publicToken)
                 }
                 is LinkExit -> {
@@ -52,13 +51,11 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+        homeViewModel = ViewModelProvider(this)[HomeViewModel::class.java]
         plaidRepository = PlaidRepository(requireContext())
-
-        // SharedPrefUtils.clearAccessToken(requireContext())
 
         val linkButton: Button = binding.openLink
         linkButton.setOnClickListener {
@@ -77,8 +74,15 @@ class HomeFragment : Fragment() {
 
                 val formattedDate = android.text.format.DateFormat.format("MMMM yyyy", calendar.time)
                 binding.monthYearInput.setText(formattedDate.toString())
+
+                homeViewModel.loadTransactions(month + 1, year) // +1 because SQLite expects 1-based month
             }
             monthYearPicker.show(parentFragmentManager, "MonthYearPickerDialog")
+        }
+
+        homeViewModel.transactions.observe(viewLifecycleOwner) { txns ->
+            Log.d("FilteredTxns", "Got ${txns.size} transactions for selected month/year.")
+            // TODO: Update your RecyclerView or UI here
         }
 
         return root
@@ -116,7 +120,6 @@ class HomeFragment : Fragment() {
             }
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

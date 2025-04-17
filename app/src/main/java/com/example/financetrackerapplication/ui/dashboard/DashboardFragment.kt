@@ -9,7 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.financetrackerapplication.databinding.FragmentDashboardBinding
+import com.example.financetrackerapplication.ui.home.MonthYearPickerDialog
 import com.example.financetrackerapplication.utils.SharedPrefUtils
+import java.util.Calendar
 
 class DashboardFragment : Fragment() {
 
@@ -34,6 +36,20 @@ class DashboardFragment : Fragment() {
 
         binding.incomeRecyclerView.adapter = incomeAdapter
         binding.expenseRecyclerView.adapter = expenseAdapter
+
+        binding.monthYearInput.setOnClickListener {
+            val monthYearPicker = MonthYearPickerDialog()
+            monthYearPicker.setListener { _, year, month, _ ->
+                val calendar = Calendar.getInstance()
+                calendar.set(Calendar.YEAR, year)
+                calendar.set(Calendar.MONTH, month)
+                val formattedDate = android.text.format.DateFormat.format("MMMM yyyy", calendar.time)
+                binding.monthYearInput.setText(formattedDate.toString())
+
+                dashboardViewModel.fetchTransactionsByMonthYear(month + 1, year) // +1 because month is 0-based
+            }
+            monthYearPicker.show(parentFragmentManager, "MonthYearPickerDialog")
+        }
 
         dashboardViewModel.transactions.observe(viewLifecycleOwner) { transactions ->
             val income = transactions.filter {

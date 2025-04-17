@@ -44,4 +44,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             _transactions.postValue(dbHelper.getAllTransactions())
         }
     }
+
+    fun fetchTransactionsByMonthYear(month: Int, year: Int) {
+        viewModelScope.launch {
+            _transactions.postValue(dbHelper.getTransactionsByMonthYear(month, year))
+        }
+    }
 }

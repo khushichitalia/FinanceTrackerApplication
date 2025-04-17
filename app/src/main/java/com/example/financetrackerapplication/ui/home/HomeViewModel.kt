@@ -1,13 +1,20 @@
 package com.example.financetrackerapplication.ui.home
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import com.example.financetrackerapplication.database.DatabaseHelper
+import com.example.financetrackerapplication.models.Transaction
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is home Fragment"
+    private val _transactions = MutableLiveData<List<Transaction>>()
+    val transactions: LiveData<List<Transaction>> = _transactions
+
+    private val dbHelper = DatabaseHelper(application)
+
+    fun loadTransactions(month: Int, year: Int) {
+        _transactions.value = dbHelper.getTransactionsByMonthYear(month, year)
     }
-    val text: LiveData<String> = _text
 }

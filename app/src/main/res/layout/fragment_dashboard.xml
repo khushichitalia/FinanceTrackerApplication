@@ -8,6 +8,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Month/Year Picker Input -->
+        <EditText
+            android:id="@+id/monthYearInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select Month and Year"
+            android:focusable="false"
+            android:clickable="true"
+            android:inputType="none"
+            android:drawableRight="@android:drawable/ic_menu_my_calendar"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:background="@android:drawable/edit_text" />
+
         <!-- Income Section -->
         <TextView
             android:id="@+id/incomeHeader"

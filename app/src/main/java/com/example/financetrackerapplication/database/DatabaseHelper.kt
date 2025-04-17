@@ -121,4 +121,28 @@ class DatabaseHelper(context: Context) :
     fun clearAllLinkedAccounts() {
         writableDatabase.execSQL("DELETE FROM $TABLE_ACCOUNTS")
     }
+
+    fun getTransactionsByMonthYear(month: Int, year: Int): List<Transaction> {
+        val transactions = mutableListOf<Transaction>()
+        val db = readableDatabase
+
+        val query = """
+        SELECT * FROM $TABLE_TRANSACTIONS
+        WHERE strftime('%m', $COLUMN_DATE) = ?
+        AND strftime('%Y', $COLUMN_DATE) = ?
+    """.trimIndent()
+
+        val cursor = db.rawQuery(query, arrayOf(String.format("%02d", month), year.toString()))
+
+        while (cursor.moveToNext()) {
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID))
+            val name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME))
+            val amount = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_AMOUNT))
+            val date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE))
+
+            transactions.add(Transaction(id.toString(), amount, date, name))
+        }
+        cursor.close()
+        return transactions
+    }
 }
